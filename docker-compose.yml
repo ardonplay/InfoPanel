@@ -10,7 +10,10 @@ services:
       database:
         condition: service_healthy 
         required: true
-
+    environment:
+        - DATABASE_CONTAINER_NAME=database
+        - DATABASE_PORT=5432
+        - DATABASE_NAME=infopanel   
   client:
     container_name: client
     build:
@@ -29,7 +32,7 @@ services:
       - '5432:5432'
     volumes:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - db-data:/var/lib/postgresql/data
+      - infopanel-db-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d infopanel"]
       interval: 10s
@@ -43,11 +46,24 @@ services:
           cpus: '1'
           memory: 4G
 
+  minio:
+    image: minio/minio
+    ports:
+      - 9000:9000
+      - 9001:9001
+    network_mode: "host"
+    environment:
+      - MINIO_ACCESS_KEY=minio1234567890
+      - MINIO_SECRET_KEY=minio1234567890
+    volumes:
+      - ./storage:/data
+    command: server --console-address ":9001" /data
+
 
 networks:
   infopanel-network:
     name: infopanel-network
 
 volumes:
-  db-data:
-    name: db-data
+ infopanel-db-data:
+    name: infopanel-db-data

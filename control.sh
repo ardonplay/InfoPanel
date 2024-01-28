@@ -153,6 +153,12 @@ build)
     docker compose build 
     ;;
 
+reset)
+    shift 1;
+    docker compose down
+    docker volume rm infopanel-db-data
+    rm -rf storage
+    ;;
 
 restart)
     shift 1;
